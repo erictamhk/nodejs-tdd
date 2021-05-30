@@ -1,0 +1,28 @@
+{
+  "name": "nodejs-tdd",
+  "version": "1.0.0",
+  "description": "Node RESTful API using TDD",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "jest --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/erictamhk/nodejs-tdd.git"
+  },
+  "keywords": [],
+  "author": "eric tam",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/erictamhk/nodejs-tdd/issues"
+  },
+  "homepage": "https://github.com/erictamhk/nodejs-tdd#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "jest": "^27.0.3",
+    "supertest": "^6.1.3"
+  }
+}
