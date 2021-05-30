@@ -49,7 +49,6 @@ describe("User Registration", () => {
         password: "P4ssword",
       })
       .then(() => {
-        // query the user table
         User.findAll().then((userList) => {
           expect(userList.length).toBe(1);
           done();
@@ -66,11 +65,27 @@ describe("User Registration", () => {
         password: "P4ssword",
       })
       .then(() => {
-        // query the user table
         User.findAll().then((userList) => {
           const savedUser = userList[0];
           expect(savedUser.username).toBe("user1");
           expect(savedUser.email).toBe("user1@mail.com");
+          done();
+        });
+      });
+  });
+
+  it("hashes the pawword in database", (done) => {
+    request(app)
+      .post("/api/1.0/users")
+      .send({
+        username: "user1",
+        email: "user1@mail.com",
+        password: "P4ssword",
+      })
+      .then(() => {
+        User.findAll().then((userList) => {
+          const savedUser = userList[0];
+          expect(savedUser.password).not.toBe("P4ssword");
           done();
         });
       });
