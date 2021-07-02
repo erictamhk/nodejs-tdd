@@ -8,5 +8,7 @@
   "password_patern": "密碼必須至少有 1 個大寫字母、1 個小寫字母和 1 個數字",
   "email_inuse": "E-mail已經使用中",
   "user_create_success": "用戶創建成功",
-  "email_failure": "E-mail傳送失敗"
+  "email_failure": "E-mail傳送失敗",
+  "account_activation_failure": "此帳戶已經啟動或Token無效",
+  "account_activation_success": "帳戶已啟動"
 }

@@ -56,31 +56,31 @@ const postUser = (user = { ...validUser }, options = {}) => {
 
 describe("User Registration", () => {
   it("returns 200 OK when signup request is valid", async () => {
-    const response = await postUser(validUser);
+    const response = await postUser();
     expect(response.status).toBe(200);
   });
 
   it("returns success message when signup request is valid", async () => {
-    const response = await postUser(validUser);
+    const response = await postUser();
     expect(response.body.message).toBe("User created");
   });
 
   it("Save the User to database", async () => {
-    await postUser(validUser);
+    await postUser();
     const userList = await User.findAll();
     expect(userList.length).toBe(1);
   });
 
   it("Save the username and email to database", async () => {
-    await postUser(validUser);
+    await postUser();
     const userList = await User.findAll();
     const savedUser = userList[0];
-    expect(savedUser.username).toBe("user1");
-    expect(savedUser.email).toBe("user1@mail.com");
+    expect(savedUser.username).toBe(validUser.username);
+    expect(savedUser.email).toBe(validUser.email);
   });
 
   it("hashes the pawword in database", async () => {
-    await postUser(validUser);
+    await postUser();
     const userList = await User.findAll();
     const savedUser = userList[0];
     expect(savedUser.password).not.toBe("P4ssword");
@@ -152,7 +152,7 @@ describe("User Registration", () => {
 
   it(`returns ${email_inuse} when same email is alreay in use`, async () => {
     await User.create({ ...validUser });
-    const response = await postUser(validUser);
+    const response = await postUser();
     expect(response.body.validationErrors.email).toBe(email_inuse);
   });
 
@@ -267,4 +267,77 @@ describe("Internationlization", () => {
     const response = await postUser({ ...validUser }, { language: "hk" });
     expect(response.body.message).toBe("E-mail傳送失敗");
   });
+});
+
+describe("Account activation", () => {
+  it("activates the account when correct token is send", async () => {
+    await postUser();
+    let users = await User.findAll();
+    const token = users[0].activationToken;
+
+    await request(app)
+      .post("/api/1.0/users/token/" + token)
+      .send();
+
+    users = await User.findAll();
+    expect(users[0].inactive).toBe(false);
+  });
+  it("removes the token from user table after successful activation", async () => {
+    await postUser();
+    let users = await User.findAll();
+    const token = users[0].activationToken;
+
+    await request(app)
+      .post("/api/1.0/users/token/" + token)
+      .send();
+
+    users = await User.findAll();
+    expect(users[0].activationToken).toBeFalsy();
+  });
+  it("dose not activate the account when token is wrong", async () => {
+    await postUser();
+    const token = "this-token-dose-not-exist";
+
+    await request(app)
+      .post("/api/1.0/users/token/" + token)
+      .send();
+
+    const users = await User.findAll();
+    expect(users[0].inactive).toBe(true);
+  });
+  it("returns bad request when token is wrong", async () => {
+    await postUser();
+    const token = "this-token-dose-not-exist";
+
+    const response = await request(app)
+      .post("/api/1.0/users/token/" + token)
+      .send();
+
+    expect(response.status).toBe(400);
+  });
+
+  it.each`
+    language | tokenStatus  | message
+    ${"hk"}  | ${"wrong"}   | ${"此帳戶已經啟動或Token無效"}
+    ${"en"}  | ${"wrong"}   | ${"This account is either active or the token is invalid"}
+    ${"hk"}  | ${"correct"} | ${"帳戶已啟動"}
+    ${"en"}  | ${"correct"} | ${"Account is activated"}
+  `(
+    "return $message when $tokenStatus token is sent and leanguage is $language",
+    async ({ language, tokenStatus, message }) => {
+      await postUser({ ...validUser }, { language });
+      let token = "this-token-dose-not-exist";
+      if (tokenStatus === "correct") {
+        let users = await User.findAll();
+        token = users[0].activationToken;
+      }
+
+      const response = await request(app)
+        .post("/api/1.0/users/token/" + token)
+        .set("Accept-Language", language)
+        .send();
+
+      expect(response.body.message).toBe(message);
+    }
+  );
 });
