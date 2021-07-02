@@ -1,0 +1,11 @@
+{
+  "username_null": "用戶名不能為空",
+  "username_size": "必須最少 4 個和最多 32 個字符",
+  "email_null": "E-mail不能為空",
+  "email_invalid": "E-mail無效",
+  "password_null": "密碼不能為空",
+  "password_size": "密碼必須至少6個字符",
+  "password_patern": "密碼必須至少有 1 個大寫字母、1 個小寫字母和 1 個數字",
+  "email_inuse": "E-mail已經使用中",
+  "user_create_success": "用戶創建成功"
+}
