@@ -137,6 +137,13 @@ describe("User Registration", () => {
     const body = response.body;
     expect(Object.keys(body.validationErrors)).toEqual(["username", "email"]);
   });
+
+  it("creates user in inactive mode", async () => {
+    await postUser();
+    const users = await User.findAll();
+    const savedUser = users[0];
+    expect(savedUser.inactive).toBe(true);
+  });
 });
 
 describe("Internationlization", () => {
