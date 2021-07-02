@@ -102,10 +102,27 @@ describe("User Registration", () => {
     ${"password"} | ${"UPPER44444"}   | ${"Password must have at least 1 uppercase, 1 lowercase letter and 1 number"}
     ${"password"} | ${"1234567890"}   | ${"Password must have at least 1 uppercase, 1 lowercase letter and 1 number"}
   `("return $expectedMessage when $field is $value", async ({ field, expectedMessage, value }) => {
-    const user = validUser;
+    const user = { ...validUser };
     user[field] = value;
     const response = await postUser(user);
     const body = response.body;
     expect(body.validationErrors[field]).toBe(expectedMessage);
+  });
+
+  it("returns E-mail in use when same email is alreay in use", async () => {
+    await User.create({ ...validUser });
+    const response = await postUser(validUser);
+    expect(response.body.validationErrors.email).toBe("E-mail in use");
+  });
+
+  it("returns errors for both username is null E-mail in use", async () => {
+    await User.create({ ...validUser });
+    const response = await postUser({
+      username: null,
+      email: validUser.email,
+      password: validUser.password,
+    });
+    const body = response.body;
+    expect(Object.keys(body.validationErrors)).toEqual(["username", "email"]);
   });
 });
