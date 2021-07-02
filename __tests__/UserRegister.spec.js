@@ -151,6 +151,12 @@ describe("User Registration", () => {
     const savedUser = users[0];
     expect(savedUser.inactive).toBe(true);
   });
+  it("creates an activationToken for user", async () => {
+    await postUser();
+    const users = await User.findAll();
+    const savedUser = users[0];
+    expect(savedUser.activationToken).toBeTruthy();
+  });
 });
 
 describe("Internationlization", () => {
