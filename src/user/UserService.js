@@ -1,6 +1,7 @@
 const User = require("./User");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
+const EmailService = require("../email/EmailService");
 
 const generateToken = (length) => {
   return crypto.randomBytes(length).toString("hex").substring(0, length);
@@ -17,6 +18,7 @@ const save = async (body) => {
   };
 
   await User.create(user);
+  await EmailService.sendAccountActivation(user.email, user.activationToken);
 };
 
 const findByEmail = async (email) => {
