@@ -210,6 +210,15 @@ describe("User Registration", () => {
     const users = await User.findAll();
     expect(users.length).toBe(0);
   });
+  it("returns validation Failure message in error response body when validation fails", async () => {
+    const response = await postUser({
+      username: null,
+      email: validUser.email,
+      password: validUser.password,
+    });
+
+    expect(response.body.message).toBe("Validation Failure");
+  });
 });
 
 describe("Internationlization", () => {
@@ -222,6 +231,7 @@ describe("Internationlization", () => {
   const password_patern = "密碼必須至少有 1 個大寫字母、1 個小寫字母和 1 個數字";
   const email_inuse = "E-mail已經使用中";
   const user_create_success = "用戶創建成功";
+  const validation_failure = "驗證失敗";
 
   it.each`
     field         | value             | expectedMessage
@@ -266,6 +276,18 @@ describe("Internationlization", () => {
     simulateSmtpFailure = true;
     const response = await postUser({ ...validUser }, { language: "hk" });
     expect(response.body.message).toBe("E-mail傳送失敗");
+  });
+  it(`returns ${validation_failure} message in error response body when validation fails`, async () => {
+    const response = await postUser(
+      {
+        username: null,
+        email: validUser.email,
+        password: validUser.password,
+      },
+      { language: "hk" }
+    );
+
+    expect(response.body.message).toBe(validation_failure);
   });
 });
 
@@ -340,4 +362,38 @@ describe("Account activation", () => {
       expect(response.body.message).toBe(message);
     }
   );
+});
+describe("Error Model", () => {
+  it("returns path, timestamp, message and validationErrors in response when validation failure", async () => {
+    const response = await postUser({ ...validUser, username: null });
+    const body = response.body;
+    expect(Object.keys(body)).toEqual(["path", "timestamp", "message", "validationErrors"]);
+  });
+  it("returns path, timestamp and message in response when request fails other than validation error", async () => {
+    const token = "this-token-dose-not-exist";
+    const response = await request(app)
+      .post("/api/1.0/users/token/" + token)
+      .send();
+    const body = response.body;
+    expect(Object.keys(body)).toEqual(["path", "timestamp", "message"]);
+  });
+  it("returns path in error body", async () => {
+    const token = "this-token-dose-not-exist";
+    const response = await request(app)
+      .post("/api/1.0/users/token/" + token)
+      .send();
+    const body = response.body;
+    expect(body.path).toBe("/api/1.0/users/token/" + token);
+  });
+  it("returns timestamp in milliseconds within 5 seconds value in error body", async () => {
+    const nowInMillis = new Date().getTime();
+    const fiveSecondsLater = nowInMillis + 5 * 1000;
+    const token = "this-token-dose-not-exist";
+    const response = await request(app)
+      .post("/api/1.0/users/token/" + token)
+      .send();
+    const body = response.body;
+    expect(body.timestamp).toBeGreaterThan(nowInMillis);
+    expect(body.timestamp).toBeLessThan(fiveSecondsLater);
+  });
 });
