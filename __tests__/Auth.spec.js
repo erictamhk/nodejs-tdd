@@ -3,6 +3,8 @@ const app = require("../src/app");
 const User = require("../src/user/User");
 const sequelize = require("../src/config/database");
 const bcrypt = require("bcrypt");
+const en = require("../locales/en/translation.json");
+const hk = require("../locales/hk/translation.json");
 
 beforeAll(async () => {
   await sequelize.sync();
@@ -61,8 +63,8 @@ describe("Authentication", () => {
 
   it.each`
     language | message
-    ${"hk"}  | ${"憑據不正確"}
-    ${"en"}  | ${"Incorrect credentials"}
+    ${"hk"}  | ${hk.authentication_failure}
+    ${"en"}  | ${en.authentication_failure}
   `("return $message for unknow user when leanguage is $language", async ({ language, message }) => {
     const response = await postAuthentication({ email: "user1@mail.com", password: "P4ssword" }, { language });
     expect(response.body.message).toBe(message);
@@ -89,8 +91,8 @@ describe("Authentication", () => {
   });
   it.each`
     language | message
-    ${"hk"}  | ${"帳戶處於非活動狀態"}
-    ${"en"}  | ${"Account is inactive"}
+    ${"hk"}  | ${hk.inactive_authentication_failure}
+    ${"en"}  | ${en.inactive_authentication_failure}
   `("return $message for unknow user when leanguage is $language", async ({ language, message }) => {
     await addUser({ ...activeUser, inactive: true });
     const response = await postAuthentication({ email: "user1@mail.com", password: "P4ssword" }, { language });

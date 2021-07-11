@@ -2,13 +2,15 @@ const request = require("supertest");
 const app = require("../src/app");
 const User = require("../src/user/User");
 const sequelize = require("../src/config/database");
+const en = require("../locales/en/translation.json");
+const hk = require("../locales/hk/translation.json");
 
 beforeAll(async () => {
   await sequelize.sync();
 });
 
-beforeEach(() => {
-  return User.destroy({ truncate: true });
+beforeEach(async () => {
+  await User.destroy({ truncate: true });
 });
 
 const getUsers = () => {
@@ -108,8 +110,8 @@ describe("Get User", () => {
 
   it.each`
     language | message
-    ${"hk"}  | ${"找不到用戶"}
-    ${"en"}  | ${"User not found"}
+    ${"hk"}  | ${hk.user_not_found}
+    ${"en"}  | ${en.user_not_found}
   `("return $message for unknow user when leanguage is $language", async ({ language, message }) => {
     const response = await getUser().set("Accept-Language", language);
     expect(response.body.message).toBe(message);
