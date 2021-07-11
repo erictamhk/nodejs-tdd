@@ -12,5 +12,7 @@
   "account_activation_failure": "此帳戶已經啟動或Token無效",
   "account_activation_success": "帳戶已啟動",
   "validation_failure": "驗證失敗",
-  "user_not_found": "找不到用戶"
+  "user_not_found": "找不到用戶",
+  "authentication_failure": "憑據不正確",
+  "inactive_authentication_failure": "帳戶處於非活動狀態"
 }
