@@ -85,4 +85,23 @@ describe("User Update", () => {
     const response = await putUser(inactiveUser.id, null, { auth: "user1@mail.com", password: "P4ssword" });
     expect(response.status).toBe(403);
   });
+
+  it("returns 200 ok when valid update request sent from authorized user", async () => {
+    const savedUser = await addUser();
+    const vaildUpdate = { username: "user1-updated" };
+    const response = await putUser(savedUser.id, vaildUpdate, {
+      auth: { email: savedUser.email, password: activeUser.password },
+    });
+    expect(response.status).toBe(200);
+  });
+
+  it("updates username in database when valid update request sent from authorized user", async () => {
+    const savedUser = await addUser();
+    const vaildUpdate = { username: "user1-updated" };
+    await putUser(savedUser.id, vaildUpdate, {
+      auth: { email: savedUser.email, password: activeUser.password },
+    });
+    const inDBUser = await User.findOne({ where: { id: savedUser.id } });
+    expect(inDBUser.username).toBe(vaildUpdate.username);
+  });
 });

@@ -5,6 +5,7 @@ const { check, validationResult } = require("express-validator");
 const ValidationException = require("../error/ValidationException");
 const ForbiddenException = require("../error/ForbiddenException");
 const pagination = require("../middleware/pagination");
+const bcrypt = require("bcrypt");
 
 router.post(
   "/api/1.0/users",
@@ -75,8 +76,31 @@ router.get("/api/1.0/users/:id", async (req, res, next) => {
   }
 });
 
-router.put("/api/1.0/users/:id", () => {
-  throw new ForbiddenException("unauthroized_user_update");
+router.put("/api/1.0/users/:id", async (req, res, next) => {
+  const authorization = req.headers.authorization;
+  if (authorization) {
+    const encoded = authorization.substring(6);
+    const decoded = Buffer.from(encoded, "base64").toString("ascii");
+    const [email, password] = decoded.split(":");
+    const user = await UserService.findByEmail(email);
+    if (!user) {
+      return next(new ForbiddenException("unauthroized_user_update"));
+    }
+    // eslint-disable-next-line eqeqeq
+    if (user.id != req.params.id) {
+      return next(new ForbiddenException("unauthroized_user_update"));
+    }
+    if (user.inactive) {
+      return next(new ForbiddenException("unauthroized_user_update"));
+    }
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return next(new ForbiddenException("unauthroized_user_update"));
+    }
+    await UserService.updateUser(req.params.id, req.body);
+    return res.send();
+  }
+  return next(new ForbiddenException("unauthroized_user_update"));
 });
 
 module.exports = router;
