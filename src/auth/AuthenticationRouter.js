@@ -3,7 +3,7 @@ const router = express.Router();
 const UserService = require("../user/UserService");
 const AuthenticationException = require("./AuthenticationException");
 const bcrypt = require("bcrypt");
-const ForbiddenException = require("./ForbiddenException");
+const ForbiddenException = require("../error/ForbiddenException");
 const { check, validationResult } = require("express-validator");
 
 router.post("/api/1.0/auth", check("email").isEmail(), async (req, res, next) => {
