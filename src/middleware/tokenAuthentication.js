@@ -1,6 +1,6 @@
 const TokenService = require("../auth/TokenService");
 
-const basicAuthentication = async (req, res, next) => {
+const tokenAuthentication = async (req, res, next) => {
   const authorization = req.headers.authorization;
   if (authorization) {
     const token = authorization.substring(7);
@@ -13,4 +13,4 @@ const basicAuthentication = async (req, res, next) => {
   next();
 };
 
-module.exports = basicAuthentication;
+module.exports = tokenAuthentication;
