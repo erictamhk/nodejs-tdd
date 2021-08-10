@@ -24,4 +24,10 @@ const deleteToken = async (token) => {
   });
 };
 
-module.exports = { createToken, verify, deleteToken };
+const deleteTokenOfUser = async (userId) => {
+  await Token.destroy({
+    where: { userId: userId },
+  });
+};
+
+module.exports = { createToken, verify, deleteToken, deleteTokenOfUser };

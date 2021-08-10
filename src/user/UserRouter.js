@@ -95,6 +95,7 @@ router.delete("/api/1.0/users/:id", tokenAuhentication, async (req, res, next) =
     return next(new ForbiddenException("unauthroized_user_delete"));
   }
   await UserService.deleteUser(req.params.id);
+
   return res.send();
 });
 
