@@ -15,5 +15,6 @@
   "user_not_found": "找不到用戶",
   "authentication_failure": "憑據不正確",
   "inactive_authentication_failure": "帳戶處於非活動狀態",
-  "unauthroized_user_update": "您無權更新用戶"
+  "unauthroized_user_update": "您無權更新用戶",
+  "unauthroized_user_delete": "您無權刪除用戶"
 }

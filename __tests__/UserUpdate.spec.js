@@ -73,26 +73,28 @@ describe("User Update", () => {
 
   it("returns forbidden when request sent with incorrect email in basic authorization", async () => {
     await addUser();
-    const response = await putUser(5, null, { auth: "user1000@mail.com", password: "P4ssword" });
+    const response = await putUser(5, null, { auth: { email: "user1000@mail.com", password: "P4ssword" } });
     expect(response.status).toBe(403);
   });
 
   it("returns forbidden when request sent with incorrect password in basic authorization", async () => {
     await addUser();
-    const response = await putUser(5, null, { auth: "user1@mail.com", password: "Password" });
+    const response = await putUser(5, null, { auth: { email: "user1@mail.com", password: "Password" } });
     expect(response.status).toBe(403);
   });
 
   it("returns forbidden when update request sent with correct credential but for different user", async () => {
     await addUser();
     const userToBeUpdated = await addUser({ ...activeUser, username: "user2", email: "user2@mail.com" });
-    const response = await putUser(userToBeUpdated.id, null, { auth: "user1@mail.com", password: "P4ssword" });
+    const response = await putUser(userToBeUpdated.id, null, {
+      auth: { email: "user1@mail.com", password: "P4ssword" },
+    });
     expect(response.status).toBe(403);
   });
 
   it("returns forbidden when update request sent with inactive user with correct credential for its own user", async () => {
     const inactiveUser = await addUser({ ...activeUser, inactive: true });
-    const response = await putUser(inactiveUser.id, null, { auth: "user1@mail.com", password: "P4ssword" });
+    const response = await putUser(inactiveUser.id, null, { auth: { email: "user1@mail.com", password: "P4ssword" } });
     expect(response.status).toBe(403);
   });
 
