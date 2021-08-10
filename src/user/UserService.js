@@ -7,7 +7,6 @@ const EmailException = require("../email/EmailException");
 const InvalidTokenException = require("./InvalidTokenException");
 const UserNotFoundException = require("./UserNotFoundException");
 const { randomString } = require("../shared/generator");
-const TokenService = require("../auth/TokenService");
 
 const save = async (body) => {
   const hash = await bcrypt.hash(body.password, 10);
@@ -82,7 +81,6 @@ const updateUser = async (id, updatedBody) => {
 
 const deleteUser = async (id) => {
   await User.destroy({ where: { id: id } });
-  await TokenService.deleteTokenOfUser(id);
 };
 
 module.exports = { save, findByEmail, activate, getUsers, getUser, updateUser, deleteUser };
