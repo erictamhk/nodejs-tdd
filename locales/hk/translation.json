@@ -18,5 +18,6 @@
   "unauthroized_user_update": "您無權更新用戶",
   "unauthroized_user_delete": "您無權刪除用戶",
   "email_not_inuse": "E-mail不存在",
-  "password_reset_request_success": "檢查您的E-mail以重置密碼"
+  "password_reset_request_success": "檢查您的E-mail以重置密碼",
+  "unauthroized_password_reset": "您無權更新密碼。請再次按照密碼重置步驟操作。"
 }
