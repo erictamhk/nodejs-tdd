@@ -98,22 +98,18 @@ router.delete("/api/1.0/users/:id", async (req, res, next) => {
   return res.send();
 });
 
-router.post(
-  "/api/1.0/password-reset",
-  check("email").isEmail().withMessage("email_invalid"),
-  async (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return next(new ValidationException(errors.array()));
-    }
-    const { email } = req.body;
-    try {
-      await UserService.passwordResetRequest(email);
-      return res.send({ message: req.t("password_reset_request_success") });
-    } catch (err) {
-      next(err);
-    }
+router.post("/api/1.0/user/password", check("email").isEmail().withMessage("email_invalid"), async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(new ValidationException(errors.array()));
   }
-);
+  const { email } = req.body;
+  try {
+    await UserService.passwordResetRequest(email);
+    return res.send({ message: req.t("password_reset_request_success") });
+  } catch (err) {
+    next(err);
+  }
+});
 
 module.exports = router;
