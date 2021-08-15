@@ -4,7 +4,6 @@ const UserService = require("./UserService");
 const { check, validationResult } = require("express-validator");
 const ValidationException = require("../error/ValidationException");
 const ForbiddenException = require("../error/ForbiddenException");
-const NotFoundException = require("../error/NotFoundException");
 const pagination = require("../middleware/pagination");
 
 router.post(
@@ -107,11 +106,13 @@ router.post(
     if (!errors.isEmpty()) {
       return next(new ValidationException(errors.array()));
     }
-    const user = await UserService.findByEmail(req.body.email);
-    if (user) {
-      return res.send();
+    const { email } = req.body;
+    try {
+      await UserService.passwordResetRequest(email);
+      return res.send({ message: req.t("password_reset_request_success") });
+    } catch (err) {
+      next(err);
     }
-    return next(new NotFoundException("email_not_inuse"));
   }
 );
 

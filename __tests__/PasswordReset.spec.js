@@ -77,4 +77,25 @@ describe("Password Reset Request", () => {
     const response = await postPasswordReset(user.email);
     expect(response.status).toBe(200);
   });
+
+  it.each`
+    language | message
+    ${"hk"}  | ${hk.password_reset_request_success}
+    ${"en"}  | ${en.password_reset_request_success}
+  `(
+    "return success response body with $message for know email for password reset request when language is set as $language",
+    async ({ language, message }) => {
+      const user = await addUser();
+      const response = await postPasswordReset(user.email, { language: language });
+
+      expect(response.body.message).toBe(message);
+    }
+  );
+
+  it("creates passwordResetToken when a password reset request is sent for known e-mail", async () => {
+    const user = await addUser();
+    await postPasswordReset(user.email);
+    const userInDB = await User.findOne({ where: { email: user.email } });
+    expect(userInDB.passwordResetToken).toBeTruthy();
+  });
 });
