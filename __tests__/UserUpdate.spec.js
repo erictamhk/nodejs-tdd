@@ -7,6 +7,7 @@ const en = require("../locales/en/translation.json");
 const hk = require("../locales/hk/translation.json");
 const fs = require("fs");
 const path = require("path");
+const config = require("config");
 
 beforeAll(async () => {
   await sequelize.sync();
@@ -145,5 +146,20 @@ describe("User Update", () => {
       auth: { email: savedUser.email, password: activeUser.password },
     });
     expect(Object.keys(response.body)).toEqual(["id", "username", "email", "image"]);
+  });
+
+  it("saves the user image to upload folder and store filename n user when update has image", async () => {
+    const filePath = path.join(".", "__tests__", "resources", "test-png.png");
+    const fileInBase64 = fs.readFileSync(filePath, { encoding: "base64" });
+    const savedUser = await addUser();
+    const vaildUpdate = { username: "user1-updated", image: fileInBase64 };
+    await putUser(savedUser.id, vaildUpdate, {
+      auth: { email: savedUser.email, password: activeUser.password },
+    });
+    const inDBUser = await User.findOne({ where: { id: savedUser.id } });
+    const { uploadDir, profileDir } = config;
+    const profileImagePath = path.join(".", uploadDir, profileDir, inDBUser.image);
+
+    expect(fs.existsSync(profileImagePath)).toBeTruthy();
   });
 });

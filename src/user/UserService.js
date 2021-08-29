@@ -8,6 +8,7 @@ const EmailException = require("../email/EmailException");
 const InvalidTokenException = require("./InvalidTokenException");
 const NotFoundException = require("../error/NotFoundException");
 const { randomString } = require("../shared/generator");
+const FileService = require("../file/FileService");
 
 const save = async (body) => {
   const hash = await bcrypt.hash(body.password, 10);
@@ -80,7 +81,9 @@ const getUser = async (id) => {
 const updateUser = async (id, updatedBody) => {
   const user = await User.findOne({ where: { id: id } });
   user.username = updatedBody.username;
-  user.image = updatedBody.image;
+  if (updatedBody.image) {
+    user.image = FileService.saveProfileImage(updatedBody.image);
+  }
   await user.save();
   return {
     id: id,
