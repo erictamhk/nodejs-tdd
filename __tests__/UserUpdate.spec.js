@@ -163,6 +163,24 @@ describe("User Update", () => {
     });
     const inDBUser = await User.findOne({ where: { id: savedUser.id } });
     const profileImagePath = path.join(profileFolder, inDBUser.image);
-    expect(fs.existsSync(profileImagePath)).toBeTruthy();
+    expect(fs.existsSync(profileImagePath)).toBe(true);
+  });
+
+  it("remove the old image after user upload new one", async () => {
+    const fileInBase64 = readFileAsBase64();
+    const savedUser = await addUser();
+    const vaildUpdate = { username: "user1-updated", image: fileInBase64 };
+    const response = await putUser(savedUser.id, vaildUpdate, {
+      auth: { email: savedUser.email, password: activeUser.password },
+    });
+
+    const firstImage = response.body.image;
+
+    await putUser(savedUser.id, vaildUpdate, {
+      auth: { email: savedUser.email, password: activeUser.password },
+    });
+
+    const profileImagePath = path.join(profileFolder, firstImage);
+    expect(fs.existsSync(profileImagePath)).toBe(false);
   });
 });
