@@ -7,7 +7,11 @@
     "start": "cross-env NODE_ENV=development nodemon index.js",
     "test": "cross-env NODE_ENV=test jest --watch",
     "posttest": "cross-env NODE_ENV=test node test-cleanup",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:staging": "cross-env NODE_ENV=staging jest -f . --runInBand --all",
+    "migrate:test": "cross-env NODE_ENV=staging sequelize-cli db:migrate",
+    "pretest:staging": "npm run migrate:test",
+    "posttest:staging": "cross-env NODE_ENV=staging node test-cleanup"
   },
   "repository": {
     "type": "git",
