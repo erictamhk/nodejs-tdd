@@ -20,13 +20,6 @@ beforeEach(() => {
   return User.destroy({ truncate: { cascade: true } });
 });
 
-afterAll(() => {
-  const files = fs.readdirSync(profileFolder);
-  for (const file of files) {
-    fs.unlinkSync(path.join(profileFolder, file));
-  }
-});
-
 const activeUser = {
   username: "user1",
   email: "user1@mail.com",
