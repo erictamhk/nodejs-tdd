@@ -15,10 +15,10 @@ const createFolders = () => {
   }
 };
 
-const saveProfileImage = (base64File) => {
+const saveProfileImage = async (base64File) => {
   const filename = randomString(32);
   const filePath = path.join(profileFolder, filename);
-  fs.writeFileSync(filePath, base64File, { encoding: "base64" });
+  await fs.promises.writeFile(filePath, base64File, { encoding: "base64" });
   return filename;
 };
 

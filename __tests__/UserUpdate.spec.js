@@ -9,12 +9,22 @@ const fs = require("fs");
 const path = require("path");
 const config = require("config");
 
+const { uploadDir, profileDir } = config;
+const profileFolder = path.join(".", uploadDir, profileDir);
+
 beforeAll(async () => {
   await sequelize.sync();
 });
 
 beforeEach(() => {
   return User.destroy({ truncate: { cascade: true } });
+});
+
+afterAll(() => {
+  const files = fs.readdirSync(profileFolder);
+  for (const file of files) {
+    fs.unlinkSync(path.join(profileFolder, file));
+  }
 });
 
 const activeUser = {
@@ -50,6 +60,11 @@ const putUser = async (id = 5, body = null, options = {}) => {
     agent.set("Authorization", `Bearer ${options.token}`);
   }
   return agent.send(body);
+};
+
+const readFileAsBase64 = () => {
+  const filePath = path.join(".", "__tests__", "resources", "test-png.png");
+  return fs.readFileSync(filePath, { encoding: "base64" });
 };
 
 describe("User Update", () => {
@@ -126,8 +141,7 @@ describe("User Update", () => {
   });
 
   it("saves the user image when update contains image as base64", async () => {
-    const filePath = path.join(".", "__tests__", "resources", "test-png.png");
-    const fileInBase64 = fs.readFileSync(filePath, { encoding: "base64" });
+    const fileInBase64 = readFileAsBase64();
     const savedUser = await addUser();
     const vaildUpdate = { username: "user1-updated", image: fileInBase64 };
     await putUser(savedUser.id, vaildUpdate, {
@@ -138,8 +152,7 @@ describe("User Update", () => {
   });
 
   it("returns success body having only id, username, email and image", async () => {
-    const filePath = path.join(".", "__tests__", "resources", "test-png.png");
-    const fileInBase64 = fs.readFileSync(filePath, { encoding: "base64" });
+    const fileInBase64 = readFileAsBase64();
     const savedUser = await addUser();
     const vaildUpdate = { username: "user1-updated", image: fileInBase64 };
     const response = await putUser(savedUser.id, vaildUpdate, {
@@ -149,17 +162,14 @@ describe("User Update", () => {
   });
 
   it("saves the user image to upload folder and store filename n user when update has image", async () => {
-    const filePath = path.join(".", "__tests__", "resources", "test-png.png");
-    const fileInBase64 = fs.readFileSync(filePath, { encoding: "base64" });
+    const fileInBase64 = readFileAsBase64();
     const savedUser = await addUser();
     const vaildUpdate = { username: "user1-updated", image: fileInBase64 };
     await putUser(savedUser.id, vaildUpdate, {
       auth: { email: savedUser.email, password: activeUser.password },
     });
     const inDBUser = await User.findOne({ where: { id: savedUser.id } });
-    const { uploadDir, profileDir } = config;
-    const profileImagePath = path.join(".", uploadDir, profileDir, inDBUser.image);
-
+    const profileImagePath = path.join(profileFolder, inDBUser.image);
     expect(fs.existsSync(profileImagePath)).toBeTruthy();
   });
 });
