@@ -4,14 +4,16 @@
   "description": "Node RESTful API using TDD",
   "main": "app.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=development nodemon index.js",
+    "start:dev": "cross-env NODE_ENV=development npm run migrate && cross-env NODE_ENV=development nodemon index",
+    "start": "cross-env NODE_ENV=production npm run migrate && cross-env NODE_ENV=production node index",
     "test": "cross-env NODE_ENV=test jest --watch",
-    "posttest": "cross-env NODE_ENV=test node test-cleanup",
+    "posttest": "cross-env NODE_ENV=test npm run clean-up",
+    "clean-up": "node test-cleanup",
+    "migrate": "sequelize-cli db:migrate",
     "lint": "eslint .",
-    "test:staging": "cross-env NODE_ENV=staging jest -f . --runInBand --all",
-    "migrate:test": "cross-env NODE_ENV=staging sequelize-cli db:migrate",
-    "pretest:staging": "npm run migrate:test",
-    "posttest:staging": "cross-env NODE_ENV=staging node test-cleanup"
+    "test:staging": "cross-env NODE_ENV=staging jest -f . --runInBand --all --forceExit",
+    "pretest:staging": "cross-env NODE_ENV=staging npm run migrate",
+    "posttest:staging": "cross-env NODE_ENV=staging npm run clean-up"
   },
   "repository": {
     "type": "git",
@@ -36,7 +38,8 @@
     "nodemailer": "^6.6.2",
     "sequelize": "^6.6.2",
     "sequelize-cli": "^6.2.0",
-    "sqlite3": "^4.2.0"
+    "sqlite3": "^4.2.0",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
