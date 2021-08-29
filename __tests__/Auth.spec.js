@@ -50,12 +50,12 @@ describe("Authentication", () => {
     const response = await postAuthentication({ email: "user1@mail.com", password: "P4ssword" });
     expect(response.status).toBe(200);
   });
-  it("returns only user id, username and token when login success", async () => {
+  it("returns only user id, username, image and token when login success", async () => {
     const user = await addUser();
     const response = await postAuthentication({ email: "user1@mail.com", password: "P4ssword" });
     expect(response.body.id).toBe(user.id);
     expect(response.body.username).toBe(user.username);
-    expect(Object.keys(response.body)).toEqual(["id", "username", "token"]);
+    expect(Object.keys(response.body)).toEqual(["id", "username", "image", "token"]);
   });
   it("returns 401 when credentials are correct", async () => {
     const response = await postAuthentication({ email: "user1@mail.com", password: "P4ssword" });
