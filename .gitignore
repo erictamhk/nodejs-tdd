@@ -105,3 +105,6 @@ dist
 
 *.sqlite
 *.sqlite-journal
+
+/upload-test
+/upload-dev
