@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const config = require("config");
+const Sequelize = require("sequelize");
 const { randomString } = require("../shared/generator");
 const FileType = require("file-type");
 const FileAttachment = require("./FileAttachment");
@@ -74,6 +75,29 @@ const asscoiateFileToHoax = async (attachmentId, hoaxId) => {
   await attachment.save();
 };
 
+const removeUnusedAttachment = () => {
+  const ONE_DAY = 24 * 60 * 60 * 1000;
+
+  setInterval(async () => {
+    const oneDayOld = new Date(Date.now() - ONE_DAY);
+    const attachments = await FileAttachment.findAll({
+      where: {
+        uploadDate: {
+          [Sequelize.Op.lt]: oneDayOld,
+        },
+        hoaxId: {
+          [Sequelize.Op.is]: null,
+        },
+      },
+    });
+    for (let attachment of attachments) {
+      const { filename } = attachment.get({ plain: true });
+      await fs.promises.unlink(path.join(attachmentFolder, filename));
+      await attachment.destroy();
+    }
+  }, ONE_DAY);
+};
+
 module.exports = {
   createFolders,
   saveProfileImage,
@@ -82,4 +106,5 @@ module.exports = {
   isSupportedFileType,
   saveAttachment,
   asscoiateFileToHoax,
+  removeUnusedAttachment,
 };
