@@ -10,6 +10,7 @@ const FileService = require("./file/FileService");
 const path = require("path");
 const config = require("config");
 const HoaxRouter = require("./hoax/HoaxRouter");
+const FileRouter = require("./file/FileRouter");
 
 const { uploadDir, profileDir } = config;
 const profileFolder = path.join(".", uploadDir, profileDir);
@@ -43,6 +44,7 @@ app.use(tokenAuthentication);
 app.use(UserRouter);
 app.use(AuthenticationRouter);
 app.use(HoaxRouter);
+app.use(FileRouter);
 
 app.use(errorHandler);
 
