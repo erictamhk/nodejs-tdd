@@ -5,15 +5,8 @@ const app = require("../src/app");
 const User = require("../src/user/User");
 const Hoax = require("../src/hoax/Hoax");
 const FileAttachment = require("../src/file/FileAttachment");
-const sequelize = require("../src/config/database");
 const en = require("../locales/en/translation.json");
 const hk = require("../locales/hk/translation.json");
-
-beforeAll(async () => {
-  if (process.env.NODE_ENV === "test") {
-    await sequelize.sync();
-  }
-});
 
 beforeEach(async () => {
   await FileAttachment.destroy({ truncate: true });
@@ -167,7 +160,7 @@ describe("Post Hoax", () => {
   it("associates hoax with attachment in database", async () => {
     const uploadResponse = await uploadFile();
     const uploadedFileId = uploadResponse.body.id;
-    console.log(uploadedFileId);
+
     await addUser();
     await postHoax({ content: vaildContent, fileAttachment: uploadedFileId }, { auth: credentials });
 
@@ -185,7 +178,7 @@ describe("Post Hoax", () => {
   it("keeps the old associated hoax when new hoax submitted with old attachment id", async () => {
     const uploadResponse = await uploadFile();
     const uploadedFileId = uploadResponse.body.id;
-    console.log(uploadedFileId);
+
     await addUser();
     await postHoax({ content: vaildContent, fileAttachment: uploadedFileId }, { auth: credentials });
     const attachment = await FileAttachment.findOne({ where: { id: uploadedFileId } });

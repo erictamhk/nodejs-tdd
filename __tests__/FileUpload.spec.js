@@ -2,7 +2,6 @@ const request = require("supertest");
 const app = require("../src/app");
 const path = require("path");
 const FileAttachment = require("../src/file/FileAttachment");
-const sequelize = require("../src/config/database");
 const fs = require("fs");
 const config = require("config");
 const en = require("../locales/en/translation.json");
@@ -10,12 +9,6 @@ const hk = require("../locales/hk/translation.json");
 
 const { uploadDir, attachmentDir } = config;
 const attachmentFolder = path.join(".", uploadDir, attachmentDir);
-
-beforeAll(async () => {
-  if (process.env.NODE_ENV === "test") {
-    await sequelize.sync();
-  }
-});
 
 beforeEach(async () => {
   await FileAttachment.destroy({ truncate: true });
