@@ -14,7 +14,6 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await Hoax.destroy({ truncate: true });
   await User.destroy({ truncate: { cascade: true } });
 });
 
@@ -146,4 +145,11 @@ describe("Authentication", () => {
       expect(response.body.validationErrors.content).toBe(message);
     }
   );
+  it("stores hoax owner id in database", async () => {
+    const user = await addUser();
+    await postHoax({ content: vaildContent }, { auth: credentials });
+    const hoaxes = await Hoax.findAll();
+    const savedHoax = hoaxes[0];
+    expect(savedHoax.userId).toBe(user.id);
+  });
 });
