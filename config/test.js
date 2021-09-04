@@ -16,4 +16,5 @@ module.exports = {
   },
   uploadDir: "upload-test",
   profileDir: "profile",
+  attachmentDir: "attachment",
 };
