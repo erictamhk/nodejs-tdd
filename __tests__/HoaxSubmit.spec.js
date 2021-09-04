@@ -56,7 +56,7 @@ const postHoax = async (body = null, options = {}) => {
   return agent.send(body);
 };
 
-describe("Authentication", () => {
+describe("Post Hoax", () => {
   it("returns 401 when hoax post request has no authentication", async () => {
     const response = await postHoax();
     expect(response.status).toBe(401);
