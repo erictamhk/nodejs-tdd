@@ -44,4 +44,41 @@ describe("Upload File for Hoax", () => {
     const filePath = path.join(attachmentFolder, attachment.filename);
     expect(fs.existsSync(filePath)).toBe(true);
   });
+  it.each`
+    file              | fileType
+    ${"test-gif.gif"} | ${"image/gif"}
+    ${"test-pdf.pdf"} | ${"application/pdf"}
+    ${"test-txt.txt"} | ${null}
+    ${"test-png.png"} | ${"image/png"}
+    ${"test-png"}     | ${"image/png"}
+    ${"test-jpg.jpg"} | ${"image/jpeg"}
+  `("saves fileType as $fileType in attachment object when $file is upload", async ({ file, fileType }) => {
+    await uploadFile(file);
+    const attachments = await FileAttachment.findAll();
+    const attachment = attachments[0];
+    expect(attachment.fileType).toBe(fileType);
+  });
+  it.each`
+    file              | fileExtension
+    ${"test-gif.gif"} | ${"gif"}
+    ${"test-pdf.pdf"} | ${"pdf"}
+    ${"test-txt.txt"} | ${null}
+    ${"test-png.png"} | ${"png"}
+    ${"test-png"}     | ${"png"}
+    ${"test-jpg.jpg"} | ${"jpg"}
+  `(
+    "saves filename with $fileExtension in attachment object and stored object when $file is upload ",
+    async ({ file, fileExtension }) => {
+      await uploadFile(file);
+      const attachments = await FileAttachment.findAll();
+      const attachment = attachments[0];
+      if (file === "test-txt.txt") {
+        expect(attachment.filename.endsWith("txt")).toBe(false);
+      } else {
+        expect(attachment.filename.endsWith(fileExtension)).toBe(true);
+      }
+      const filePath = path.join(attachmentFolder, attachment.filename);
+      expect(fs.existsSync(filePath)).toBe(true);
+    }
+  );
 });
