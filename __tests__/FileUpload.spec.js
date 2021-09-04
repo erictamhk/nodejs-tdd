@@ -5,6 +5,8 @@ const FileAttachment = require("../src/file/FileAttachment");
 const sequelize = require("../src/config/database");
 const fs = require("fs");
 const config = require("config");
+const en = require("../locales/en/translation.json");
+const hk = require("../locales/hk/translation.json");
 
 const { uploadDir, attachmentDir } = config;
 const attachmentFolder = path.join(".", uploadDir, attachmentDir);
@@ -19,9 +21,13 @@ beforeEach(async () => {
   await FileAttachment.destroy({ truncate: true });
 });
 
-const uploadFile = (file = "test-png.png") => {
+const uploadFile = (file = "test-png.png", options = {}) => {
   const filePath = path.join(".", "__tests__", "resources", file);
-  return request(app).post("/api/1.0/hoaxes/attachments").attach("file", filePath);
+  const agent = request(app).post("/api/1.0/hoaxes/attachments");
+  if (options.language) {
+    agent.set("Accept-Language", options.language);
+  }
+  return agent.attach("file", filePath);
 };
 
 describe("Upload File for Hoax", () => {
@@ -81,4 +87,40 @@ describe("Upload File for Hoax", () => {
       expect(fs.existsSync(filePath)).toBe(true);
     }
   );
+  it("returns 400 when uploaded file size is bigger than 5mb", async () => {
+    const fiveMB = 5 * 1024 * 1024;
+    const filename = "random-file";
+    const filePath = path.join(".", "__tests__", "resources", filename);
+    await fs.promises.writeFile(filePath, "a".repeat(fiveMB) + "a");
+    const response = await uploadFile(filename);
+    expect(response.status).toBe(400);
+    await fs.promises.unlink(filePath);
+  });
+  it("returns 400 when uploaded file size is 5mb", async () => {
+    const fiveMB = 5 * 1024 * 1024;
+    const filename = "random-file";
+    const filePath = path.join(".", "__tests__", "resources", filename);
+    await fs.promises.writeFile(filePath, "a".repeat(fiveMB));
+    const response = await uploadFile(filename);
+    expect(response.status).toBe(200);
+    await fs.promises.unlink(filePath);
+  });
+
+  it.each`
+    language | message
+    ${"hk"}  | ${hk.attachment_size_limit}
+    ${"en"}  | ${en.attachment_size_limit}
+  `("return $message when file size exceeds 5mb when language is set as $language", async ({ language, message }) => {
+    const fiveMB = 5 * 1024 * 1024;
+    const nowInMillis = new Date().getTime();
+    const filename = "random-file";
+    const filePath = path.join(".", "__tests__", "resources", filename);
+    await fs.promises.writeFile(filePath, "a".repeat(fiveMB) + "a");
+    const response = await uploadFile(filename, { language: language });
+    const error = response.body;
+    expect(error.path).toBe("/api/1.0/hoaxes/attachments");
+    expect(error.timestamp).toBeGreaterThan(nowInMillis);
+    expect(error.message).toBe(message);
+    await fs.promises.unlink(filePath);
+  });
 });
