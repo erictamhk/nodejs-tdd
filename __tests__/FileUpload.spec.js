@@ -123,4 +123,9 @@ describe("Upload File for Hoax", () => {
     expect(error.message).toBe(message);
     await fs.promises.unlink(filePath);
   });
+
+  it("returns attachment id in response", async () => {
+    const response = await uploadFile();
+    expect(Object.keys(response.body)).toEqual(["id"]);
+  });
 });

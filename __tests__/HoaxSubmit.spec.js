@@ -1,11 +1,13 @@
 const request = require("supertest");
+const bcrypt = require("bcrypt");
+const path = require("path");
 const app = require("../src/app");
+const User = require("../src/user/User");
+const Hoax = require("../src/hoax/Hoax");
+const FileAttachment = require("../src/file/FileAttachment");
+const sequelize = require("../src/config/database");
 const en = require("../locales/en/translation.json");
 const hk = require("../locales/hk/translation.json");
-const User = require("../src/user/User");
-const sequelize = require("../src/config/database");
-const bcrypt = require("bcrypt");
-const Hoax = require("../src/hoax/Hoax");
 
 beforeAll(async () => {
   if (process.env.NODE_ENV === "test") {
@@ -14,6 +16,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  await FileAttachment.destroy({ truncate: true });
   await User.destroy({ truncate: { cascade: true } });
 });
 
@@ -27,6 +30,15 @@ const activeUser = {
 const credentials = { email: activeUser.email, password: activeUser.password };
 
 const vaildContent = "Hoax content";
+
+const uploadFile = (file = "test-png.png", options = {}) => {
+  const filePath = path.join(".", "__tests__", "resources", file);
+  const agent = request(app).post("/api/1.0/hoaxes/attachments");
+  if (options.language) {
+    agent.set("Accept-Language", options.language);
+  }
+  return agent.attach("file", filePath);
+};
 
 const addUser = async (user = { ...activeUser }) => {
   const hash = await bcrypt.hash(user.password, 10);
@@ -151,5 +163,36 @@ describe("Post Hoax", () => {
     const hoaxes = await Hoax.findAll();
     const savedHoax = hoaxes[0];
     expect(savedHoax.userId).toBe(user.id);
+  });
+  it("associates hoax with attachment in database", async () => {
+    const uploadResponse = await uploadFile();
+    const uploadedFileId = uploadResponse.body.id;
+    console.log(uploadedFileId);
+    await addUser();
+    await postHoax({ content: vaildContent, fileAttachment: uploadedFileId }, { auth: credentials });
+
+    const hoaxes = await Hoax.findAll();
+    const savedHoax = hoaxes[0];
+
+    const attachmentInDb = await FileAttachment.findOne({ where: { id: uploadedFileId } });
+    expect(attachmentInDb.hoaxId).toBe(savedHoax.id);
+  });
+  it("returns 200 ok even the attachment does not exist", async () => {
+    await addUser();
+    const response = await postHoax({ content: vaildContent, fileAttachment: 1000 }, { auth: credentials });
+    expect(response.status).toBe(200);
+  });
+  it("keeps the old associated hoax when new hoax submitted with old attachment id", async () => {
+    const uploadResponse = await uploadFile();
+    const uploadedFileId = uploadResponse.body.id;
+    console.log(uploadedFileId);
+    await addUser();
+    await postHoax({ content: vaildContent, fileAttachment: uploadedFileId }, { auth: credentials });
+    const attachment = await FileAttachment.findOne({ where: { id: uploadedFileId } });
+
+    await postHoax({ content: vaildContent + " 2", fileAttachment: uploadedFileId }, { auth: credentials });
+    const attachmentAfterSecondPost = await FileAttachment.findOne({ where: { id: uploadedFileId } });
+
+    expect(attachment.hoaxId).toBe(attachmentAfterSecondPost.hoaxId);
   });
 });
