@@ -24,6 +24,8 @@ const activeUser = {
   inactive: false,
 };
 
+const credentials = { email: activeUser.email, password: activeUser.password };
+
 const addUser = async (user = { ...activeUser }) => {
   const hash = await bcrypt.hash(user.password, 10);
   user.password = hash;
@@ -75,7 +77,7 @@ describe("User Delete", () => {
   it("returns forbidden when delete request sent with correct credential but for different user", async () => {
     await addUser();
     const userToBeDeleted = await addUser({ ...activeUser, username: "user2", email: "user2@mail.com" });
-    const token = await auth({ auth: { email: "user1@mail.com", password: "P4ssword" } });
+    const token = await auth({ auth: credentials });
     const response = await deleteUser(userToBeDeleted.id, { token });
     expect(response.status).toBe(403);
   });
@@ -87,7 +89,7 @@ describe("User Delete", () => {
 
   it("returns 200 ok when valid update request sent from authorized user", async () => {
     const savedUser = await addUser();
-    const token = await auth({ auth: { email: savedUser.email, password: activeUser.password } });
+    const token = await auth({ auth: credentials });
     const response = await deleteUser(savedUser.id, {
       token,
     });
@@ -96,7 +98,7 @@ describe("User Delete", () => {
 
   it("delete user from database when request sent from authorized user", async () => {
     const savedUser = await addUser();
-    const token = await auth({ auth: { email: savedUser.email, password: activeUser.password } });
+    const token = await auth({ auth: credentials });
     await deleteUser(savedUser.id, {
       token,
     });
@@ -106,7 +108,7 @@ describe("User Delete", () => {
 
   it("delete token from database when delete user request sent from authorized user", async () => {
     const savedUser = await addUser();
-    const token = await auth({ auth: { email: savedUser.email, password: activeUser.password } });
+    const token = await auth({ auth: credentials });
     await deleteUser(savedUser.id, {
       token,
     });
@@ -116,8 +118,8 @@ describe("User Delete", () => {
 
   it("delete all tokens from database when delete user request sent from authorized user", async () => {
     const savedUser = await addUser();
-    const token1 = await auth({ auth: { email: savedUser.email, password: activeUser.password } });
-    const token2 = await auth({ auth: { email: savedUser.email, password: activeUser.password } });
+    const token1 = await auth({ auth: credentials });
+    const token2 = await auth({ auth: credentials });
     await deleteUser(savedUser.id, {
       token: token1,
     });

@@ -29,6 +29,8 @@ const activeUser = {
   inactive: false,
 };
 
+const credentials = { email: activeUser.email, password: activeUser.password };
+
 const addUser = async (user = { ...activeUser }) => {
   const hash = await bcrypt.hash(user.password, 10);
   user.password = hash;
@@ -100,14 +102,14 @@ describe("User Update", () => {
     await addUser();
     const userToBeUpdated = await addUser({ ...activeUser, username: "user2", email: "user2@mail.com" });
     const response = await putUser(userToBeUpdated.id, null, {
-      auth: { email: "user1@mail.com", password: "P4ssword" },
+      auth: credentials,
     });
     expect(response.status).toBe(403);
   });
 
   it("returns forbidden when update request sent with inactive user with correct credential for its own user", async () => {
     const inactiveUser = await addUser({ ...activeUser, inactive: true });
-    const response = await putUser(inactiveUser.id, null, { auth: { email: "user1@mail.com", password: "P4ssword" } });
+    const response = await putUser(inactiveUser.id, null, { auth: credentials });
     expect(response.status).toBe(403);
   });
 

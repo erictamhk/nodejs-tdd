@@ -9,6 +9,7 @@ const tokenAuthentication = require("./middleware/tokenAuthentication");
 const FileService = require("./file/FileService");
 const path = require("path");
 const config = require("config");
+const HoaxRouter = require("./hoax/HoaxRouter");
 
 const { uploadDir, profileDir } = config;
 const profileFolder = path.join(".", uploadDir, profileDir);
@@ -41,6 +42,7 @@ app.use("/images", express.static(profileFolder, { maxAge: ONE_YEAR_IN_MILLIS })
 app.use(tokenAuthentication);
 app.use(UserRouter);
 app.use(AuthenticationRouter);
+app.use(HoaxRouter);
 
 app.use(errorHandler);
 

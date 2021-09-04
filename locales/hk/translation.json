@@ -21,5 +21,6 @@
   "password_reset_request_success": "檢查您的E-mail以重置密碼",
   "unauthroized_password_reset": "您無權更新密碼。請再次按照密碼重置步驟操作。",
   "profile_image_size": "您的個人資料圖片不能大於 2MB",
-  "unsupported_image_file": "只允許 JPEG 或 PNG 文件"
+  "unsupported_image_file": "只允許 JPEG 或 PNG 文件",
+  "unauthroized_hoax_submit": "您無權發布Hoax"
 }
