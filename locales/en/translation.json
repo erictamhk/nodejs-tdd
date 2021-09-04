@@ -22,5 +22,6 @@
   "unauthroized_password_reset": "You are not authorized to update your password. Please follow the password reset steps agagin.",
   "profile_image_size": "Your profile image cannot be bigger then 2MB",
   "unsupported_image_file": "Only JPEG or PNG files are allowed",
-  "unauthroized_hoax_submit": "You are not authorized to post hoax"
+  "unauthroized_hoax_submit": "You are not authorized to post hoax",
+  "hoax_submit_success": "Hoax is saved"
 }
