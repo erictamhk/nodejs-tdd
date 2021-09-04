@@ -107,4 +107,43 @@ describe("Authentication", () => {
     const response = await postHoax({ content: vaildContent }, { language: language, auth: credentials });
     expect(response.body.message).toBe(message);
   });
+  it.each`
+    language | message
+    ${"hk"}  | ${hk.validation_failure}
+    ${"en"}  | ${en.validation_failure}
+  `(
+    "return 400 and $message when hoax content is less than 10 characters when language is $language",
+    async ({ language, message }) => {
+      await addUser();
+      const response = await postHoax({ content: "123456789" }, { language: language, auth: credentials });
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe(message);
+    }
+  );
+  it("returns validation error body when an invalid hoax post by authorized user", async () => {
+    await addUser();
+    const nowInMillis = new Date().getTime();
+    const response = await postHoax({ content: "123456789" }, { auth: credentials });
+
+    const error = response.body;
+    expect(error.path).toBe("/api/1.0/hoaxes");
+    expect(error.timestamp).toBeGreaterThan(nowInMillis);
+    expect(Object.keys(error)).toEqual(["path", "timestamp", "message", "validationErrors"]);
+  });
+  it.each`
+    language | content             | contentForDescription | message
+    ${"hk"}  | ${null}             | ${"null"}             | ${hk.hoax_content_size}
+    ${"hk"}  | ${"a".repeat(9)}    | ${"short"}            | ${hk.hoax_content_size}
+    ${"hk"}  | ${"a".repeat(5001)} | ${"very long"}        | ${hk.hoax_content_size}
+    ${"en"}  | ${null}             | ${"null"}             | ${en.hoax_content_size}
+    ${"en"}  | ${"a".repeat(9)}    | ${"short"}            | ${en.hoax_content_size}
+    ${"en"}  | ${"a".repeat(5001)} | ${"very long"}        | ${en.hoax_content_size}
+  `(
+    "return $message when content is $contentForDescription and the language is $language",
+    async ({ language, content, message }) => {
+      await addUser();
+      const response = await postHoax({ content: content }, { language: language, auth: credentials });
+      expect(response.body.validationErrors.content).toBe(message);
+    }
+  );
 });
