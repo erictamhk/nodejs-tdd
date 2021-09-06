@@ -97,6 +97,8 @@ const updateUser = async (id, updatedBody) => {
 };
 
 const deleteUser = async (id) => {
+  const user = await User.findOne({ where: { id: id } });
+  await FileService.deleteUserFiles(user);
   await User.destroy({ where: { id: id } });
 };
 
