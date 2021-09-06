@@ -25,5 +25,6 @@
   "unauthroized_hoax_submit": "您無權發布Hoax",
   "hoax_submit_success": "Hoax被保存",
   "hoax_content_size": "Hoax必須最少 10 個字符，最多 5000 個字符",
-  "attachment_size_limit": "上傳的文件不能大於 5MB"
+  "attachment_size_limit": "上傳的文件不能大於 5MB",
+  "unauthroized_hoax_delete": "您無權刪除這Hoax"
 }
